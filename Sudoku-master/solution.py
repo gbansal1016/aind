@@ -178,16 +178,15 @@ def naked_twins(values):
             cells = []
             if twin[0]==key[0]:
                 cells = [twin[0] + c for c in cols]
-            else:
+            elif twin[1]==key[1]:
                 cells = [ r + twin[1]  for r in rows]
-
 
             if twin in sq_peers:
                 cells = cells + sq_peers
 
             cells.remove(twin)
             cells.remove(key)
-            
+
             for cell in cells:
                 if len(values[cell])>2:
                     for v in box_val:
@@ -207,7 +206,7 @@ def reduce_puzzle(values):
         # Your code here: Use the Only Choice Strategy
         values = only_choice(values)
         
-        #values = naked_twins(values)
+        values = naked_twins(values)
         
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
@@ -252,9 +251,17 @@ def solve(grid):
     
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    solve(diag_sudoku_grid)
+    
+    diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
+   
+    display(grid_values(diag_sudoku_grid))
 
-    try:
+    values = solve(diag_sudoku_grid)
+    print('---------------------')
+
+    display(values)
+
+    '''try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)
 
@@ -262,4 +269,7 @@ if __name__ == '__main__':
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+'''
+
+
 
