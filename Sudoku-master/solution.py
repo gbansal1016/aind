@@ -85,34 +85,7 @@ def eliminate(values):
             row_peers = cross(cell[0],cols)
             col_peers = cross(rows, cell[1])
             
-            row_idx = rows.index(cell[0])
-            col_idx = cols.index(cell[1])
-            
-            sq_peer_row = [cell[0]]
-            sq_peer_col = [cell[1]]            
-
-            if(row_idx %3 == 0):
-                sq_peer_row.append(rows[row_idx+1])
-                sq_peer_row.append(rows[row_idx+2])
-            elif(row_idx%3  == 1):
-                sq_peer_row.append(rows[row_idx+1])
-                sq_peer_row.append(rows[row_idx-1])
-            else:
-                sq_peer_row.append(rows[row_idx-1]);
-                sq_peer_row.append(rows[row_idx-2]);
-    
-            if(col_idx %3 == 0):
-                sq_peer_col.append(cols[col_idx+1])
-                sq_peer_col.append(cols[col_idx+2])
-            elif(col_idx % 3 == 1):
-                sq_peer_col.append(cols[col_idx+1])
-                sq_peer_col.append(cols[col_idx-1])
-            else:
-                sq_peer_col.append(cols[col_idx-1])
-                sq_peer_col.append(cols[col_idx-2])
-            
-            sq_peers = cross(sq_peer_row,sq_peer_col)
-            
+            sq_peers = get_sq_peers(key)
             diag_1_peers = []
             diag_2_peers = []
             if key in diag_1:
@@ -148,6 +121,36 @@ def only_choice(values):
                         values[box] = x
     return values
 
+def get_sq_peers(key):
+    row_idx = rows.index(key[0])
+    col_idx = cols.index(key[1])
+
+    sq_peer_row = [key[0]]
+    sq_peer_col = [key[1]]            
+
+    if(row_idx %3 == 0):
+        sq_peer_row.append(rows[row_idx+1])
+        sq_peer_row.append(rows[row_idx+2])
+    elif(row_idx%3  == 1):
+        sq_peer_row.append(rows[row_idx+1])
+        sq_peer_row.append(rows[row_idx-1])
+    else:
+        sq_peer_row.append(rows[row_idx-1]);
+        sq_peer_row.append(rows[row_idx-2]);
+
+    if(col_idx %3 == 0):
+        sq_peer_col.append(cols[col_idx+1])
+        sq_peer_col.append(cols[col_idx+2])
+    elif(col_idx % 3 == 1):
+        sq_peer_col.append(cols[col_idx+1])
+        sq_peer_col.append(cols[col_idx-1])
+    else:
+        sq_peer_col.append(cols[col_idx-1])
+        sq_peer_col.append(cols[col_idx-2])
+    
+    sq_peers = cross(sq_peer_row,sq_peer_col)
+    return sq_peers
+
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
     Args:
@@ -169,6 +172,8 @@ def naked_twins(values):
         if (not twins):
             continue
         
+        sq_peers = get_sq_peers(key)
+        
         for twin in twins:
             cells = []
             if twin[0]==key[0]:
@@ -176,13 +181,18 @@ def naked_twins(values):
             else:
                 cells = [ r + twin[1]  for r in rows]
 
+
+            if twin in sq_peers:
+                cells = cells + sq_peers
+
             cells.remove(twin)
             cells.remove(key)
+            
             for cell in cells:
                 if len(values[cell])>2:
                     for v in box_val:
                         values[cell] = values[cell].replace(v,'')
-                        
+       
     return values
 
 
@@ -198,6 +208,7 @@ def reduce_puzzle(values):
         values = only_choice(values)
         
         #values = naked_twins(values)
+        
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # If no new values were added, stop the loop.
@@ -251,3 +262,4 @@ if __name__ == '__main__':
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+
