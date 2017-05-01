@@ -184,8 +184,11 @@ def naked_twins(values):
             if twin in sq_peers:
                 cells = cells + sq_peers
 
-            cells.remove(twin)
-            cells.remove(key)
+            if twin in cells:
+                cells.remove(twin)
+
+            if key in cells:
+                cells.remove(key)
 
             for cell in cells:
                 if len(values[cell])>2:
@@ -247,6 +250,9 @@ def solve(grid):
     
     values = grid_values(grid)
     values = reduce_puzzle(values)
+    if len([box for box in values.keys() if len(values[box]) != 1]):
+        return False
+    
     return values
     
 if __name__ == '__main__':
@@ -258,8 +264,8 @@ if __name__ == '__main__':
 
     values = solve(diag_sudoku_grid)
     print('---------------------')
-
-    display(values)
+    if values:
+        display(values)
 
     '''try:
         from visualize import visualize_assignments
