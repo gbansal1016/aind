@@ -167,37 +167,18 @@ def naked_twins(values):
             continue
         
         peer_boxes = peers[key]
-        
         twins = [ b for b in peer_boxes if values[b]==box_val ]
         if (not twins):
             continue
         
-        sq_peers = get_sq_peers(key)
-        
         for twin in twins:
-            cells = []
-            if twin[0]==key[0]:
-                cells = [twin[0] + c for c in cols]
-            elif twin[1]==key[1]:
-                cells = [ r + twin[1]  for r in rows]
-
-            if twin in sq_peers:
-                cells = cells + sq_peers
-
-            if twin in cells:
-                cells.remove(twin)
-
-            if key in cells:
-                cells.remove(key)
-
-            for cell in cells:
-                if len(values[cell])>2:
+            for cell in peers[key] & peers[twin]:
+                if len(values[cell])>1:
                     for v in box_val:
                         values[cell] = values[cell].replace(v,'')
-       
+        
     return values
-
-
+        
 def reduce_puzzle(values):
     stalled = False
     while not stalled:
@@ -258,15 +239,20 @@ def solve(grid):
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     
-    diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
+    #diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
    
-    display(grid_values(diag_sudoku_grid))
+    #display(grid_values(diag_sudoku_grid))
 
-    values = solve(diag_sudoku_grid)
-    print('---------------------')
-    if values:
-        display(values)
+    #values = solve(diag_sudoku_grid)
+    #print('---------------------')
+    #if values:
+    #    display(values)
 
+    values = {"G7": "2345678", "G6": "1236789", "G5": "23456789", "G4": "345678", "G3": "1234569", "G2": "12345678", "G1": "23456789", "G9": "24578", "G8": "345678", "C9": "124578", "C8": "3456789", "C3": "1234569", "C2": "1234568", "C1": "2345689", "C7": "2345678", "C6": "236789", "C5": "23456789", "C4": "345678", "E5": "678", "E4": "2", "F1": "1", "F2": "24", "F3": "24", "F4": "9", "F5": "37", "F6": "37", "F7": "58", "F8": "58", "F9": "6", "B4": "345678", "B5": "23456789", "B6": "236789", "B7": "2345678", "B1": "2345689", "B2": "1234568", "B3": "1234569", "B8": "3456789", "B9": "124578", "I9": "9", "I8": "345678", "I1": "2345678", "I3": "23456", "I2": "2345678", "I5": "2345678", "I4": "345678", "I7": "1", "I6": "23678", "A1": "2345689", "A3": "7", "A2": "234568", "E9": "3", "A4": "34568", "A7": "234568", "A6": "23689", "A9": "2458", "A8": "345689", "E7": "9", "E6": "4", "E1": "567", "E3": "56", "E2": "567", "E8": "1", "A5": "1", "H8": "345678", "H9": "24578", "H2": "12345678", "H3": "1234569", "H1": "23456789", "H6": "1236789", "H7": "2345678", "H4": "345678", "H5": "23456789", "D8": "2", "D9": "47", "D6": "5", "D7": "47", "D4": "1", "D5": "36", "D2": "9", "D3": "8", "D1": "36"}
+    display(values)
+    values = naked_twins(values)
+    print('----------------')
+    display(values)
     '''try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)
