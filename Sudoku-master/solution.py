@@ -203,6 +203,7 @@ def reduce_puzzle(values):
 
 def search(values):
     values = reduce_puzzle(values)
+
     if values is False:
         return False ## Failed earlier
     
@@ -230,14 +231,15 @@ def solve(grid):
     """
     
     values = grid_values(grid)
-    values = reduce_puzzle(values)
-    if not values or len([box for box in values.keys() if len(values[box]) != 1]):
-        return False
+    values = search(values)
+    #values = reduce_puzzle(values)
+    #if not values or len([box for box in values.keys() if len(values[box]) != 1]):
+    #    return False
     
     return values
     
 if __name__ == '__main__':
-    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    #diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     
     diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
     display(grid_values(diag_sudoku_grid))
