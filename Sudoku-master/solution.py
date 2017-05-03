@@ -232,7 +232,7 @@ def solve(grid):
     values = grid_values(grid)
     values = reduce_puzzle(values)
     if values and len([box for box in values.keys() if len(values[box]) != 1]):
-            return False
+        return False
     
     return values
     
