@@ -3,11 +3,17 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: Naked twin is a strategy to solve sudoku problem. The strategy works by identifying pairs from peers that can accept the same 2 digits as valid values. The strategy is implemented by iterating through all the cells that can accept only 2 digits as valid value in the box. The next step is to identify other cells from the list of peers that also has same 2 digits as valid values for the box. These other cells if found are called naked twins. The identification of naked twins constraints the digits that can be present in all other peers of these pairs. Essentialy the 2 digits are locked as possible values for the pair of naked twins. This implies that these 2 digits can be safely removed as possible digits from the all the common set of peers of the naked twins. The constraint on potential digits enforced by naked twin is propagated across all the common peers of the naked twins. 
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: Diagonal sudoko enforces the constraint that the 2 long diagonals of the sudoku should contain all digits 1-9 at max once along the diagonal boxes and at the same time meet the constraint of the general sudoku. 
+
+The solution of diagonal sudoku is an extension of the original sudoku. The solution is found by iteratively applying  the strategy of only_choice, eliminate and naked_twins until the solution is found or there is no feasible solution. 
+
+To solve diagonal sudoku, the additional diagonal constraint is enforced by appending the cells along the diagonal to the unitlist. Only_choice strategy is then applied to the elements of unitlist by identifying the unique digit that is not present in any other cell of the unitlist.
+
+The search algorithm is then used if the solution is not found after applying the only_choice, eliminate and naked_twins. The search algorithm subsitutes the digits in the unsolved boxes one at a time from the possible values of digits. After substituting the digit, the search algorith is recursively invoked. 
 
 ### Install
 

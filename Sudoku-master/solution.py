@@ -15,24 +15,34 @@ square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','45
 diag_1 = []
 diag_2 = []
 
-for rs,cs in zip(('ABCDEFGHI'), ('123456789')):
-    diag_1.append(rs + cs)
-
-for rs,cs in zip(('ABCDEFGHI'), ('987654321')):
-    diag_2.append(rs + cs)
-
+diag_1 = [a[0]+a[1] for a in zip(rows, cols)]
+diag_2 = [a[0]+a[1] for a in zip(rows, cols[::-1])]
 diag_unit = [diag_1, diag_2]    
+
+#for rs,cs in zip(('ABCDEFGHI'), ('123456789')):
+#    diag_1.append(rs + cs)
+
+#for rs,cs in zip(('ABCDEFGHI'), ('987654321')):
+#    diag_2.append(rs + cs)
+
 unitlist = row_unit + col_unit + square_units + diag_unit
 
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 def assign_value(values, box, value):
+
     """
-    Please use this function to update your values dictionary!
     Assigns a value to a given box. If it updates the board record it.
+    Args:
+        values(dict): The sudoku in dictionary forms
+        box: The boxes to assign value, e.g., 'A1'
+        Values: The value to assign to the box, e.g., '8'
+    Returns:
+        values(dict): The updated sudoku with value assigned in the box
     """
 
+    
     # Don't waste memory appending actions that don't actually change any values
     if values[box] == value:
         return values
@@ -79,6 +89,13 @@ def display(values):
     return
 
 def eliminate(values):
+    """
+    Eliminates the value of single valued box from each of its peers
+    Args:
+        values(dict): The sudoku in dictionary forms
+    Returns:
+        values(dict): The updated sudoku with value of each single value box removed from each of its peer
+    """
     for key in values.keys():
         if(len(values[key])==1):
             cell = list(key)
@@ -94,6 +111,7 @@ def eliminate(values):
             if key in diag_2:
                 diag_2_peers = diag_2
             
+            # identifies all the peers for the single valued box
             peerlist = row_peers + col_peers + sq_peers + diag_1_peers + diag_2_peers
             val = values[key]
 
@@ -106,6 +124,15 @@ def eliminate(values):
     return values
 
 def only_choice(values):
+    """
+    Applies only_choice strategy to Sudoko. Scans multi valued boxes in a unit and assigns the digit to the box
+    only if the box in the unit can have single digit as the legit value
+    Args:
+        values(dict): The sudoku in dictionary forms
+    Returns:
+        values(dict): The updated sudoku with only choice strategy applied
+    """
+
     for units in unitlist:
         for box in units:
             box_val = values[box]            
@@ -122,12 +149,21 @@ def only_choice(values):
     return values
 
 def get_sq_peers(key):
+    """
+    Returns the peers within 3*3 square of the box
+    Args:
+        key: box within the sudoku
+    Returns:
+        sq_peers(list): List of peers within the 3*3 box
+    """
+    
     row_idx = rows.index(key[0])
     col_idx = cols.index(key[1])
 
     sq_peer_row = [key[0]]
     sq_peer_col = [key[1]]            
 
+    #Get the row peers for the inner 3*3 squares of the sudoku
     if(row_idx %3 == 0):
         sq_peer_row.append(rows[row_idx+1])
         sq_peer_row.append(rows[row_idx+2])
@@ -159,7 +195,6 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
-    # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
     for key in values.keys():
         box_val = values[key]
@@ -180,6 +215,16 @@ def naked_twins(values):
     return values
         
 def reduce_puzzle(values):
+    """Iteratively applies the strategy of only_choice, eliminate and naked_twins until the solution is found or 
+    there is no feasible solution
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        False if there is no valid solution of the sudoku problem
+        Solved sudoku with all the constraints of sudoku problem satisfied
+    """
+
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value
@@ -202,6 +247,15 @@ def reduce_puzzle(values):
     return values
 
 def search(values):
+    """Applies recursion on the unsolved sudoku boxes. Searches the soution by recursively substituting value of unsolved boxes by each feasible digit. 
+
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        False if there is no valid solution of the sudoku problem
+        Solved sudoku with all the constraints of sudoku problem satisfied
+    """
     values = reduce_puzzle(values)
 
     if values is False:
@@ -239,9 +293,9 @@ def solve(grid):
     return values
     
 if __name__ == '__main__':
-    #diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     
-    diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
+    #diag_sudoku_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
     display(grid_values(diag_sudoku_grid))
 
     values = solve(diag_sudoku_grid)
@@ -249,21 +303,24 @@ if __name__ == '__main__':
     if values:
         display(values)
 
-    '''values = {"G7": "2345678", "G6": "1236789", "G5": "23456789", "G4": "345678", "G3": "1234569", "G2": "12345678", "G1": "23456789", "G9": "24578", "G8": "345678", "C9": "124578", "C8": "3456789", "C3": "1234569", "C2": "1234568", "C1": "2345689", "C7": "2345678", "C6": "236789", "C5": "23456789", "C4": "345678", "E5": "678", "E4": "2", "F1": "1", "F2": "24", "F3": "24", "F4": "9", "F5": "37", "F6": "37", "F7": "58", "F8": "58", "F9": "6", "B4": "345678", "B5": "23456789", "B6": "236789", "B7": "2345678", "B1": "2345689", "B2": "1234568", "B3": "1234569", "B8": "3456789", "B9": "124578", "I9": "9", "I8": "345678", "I1": "2345678", "I3": "23456", "I2": "2345678", "I5": "2345678", "I4": "345678", "I7": "1", "I6": "23678", "A1": "2345689", "A3": "7", "A2": "234568", "E9": "3", "A4": "34568", "A7": "234568", "A6": "23689", "A9": "2458", "A8": "345689", "E7": "9", "E6": "4", "E1": "567", "E3": "56", "E2": "567", "E8": "1", "A5": "1", "H8": "345678", "H9": "24578", "H2": "12345678", "H3": "1234569", "H1": "23456789", "H6": "1236789", "H7": "2345678", "H4": "345678", "H5": "23456789", "D8": "2", "D9": "47", "D6": "5", "D7": "47", "D4": "1", "D5": "36", "D2": "9", "D3": "8", "D1": "36"}
-    display(values)
-    values = solve(values)
-    if values:
-        print('----------------')
-        display(values)
     try:
         from visualize import visualize_assignments
+        assignments.append(values.copy())
         visualize_assignments(assignments)
 
     except SystemExit:
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
-'''
 
 
-
+    values = {"G7": "2345678", "G6": "1236789", "G5": "23456789", "G4": "345678", "G3": "1234569", "G2": "12345678", "G1": "23456789", "G9": "24578", "G8": "345678", "C9": "124578", "C8": "3456789", "C3": "1234569", "C2": "1234568", "C1": "2345689", "C7": "2345678", "C6": "236789", "C5": "23456789", "C4": "345678", "E5": "678", "E4": "2", "F1": "1", "F2": "24", "F3": "24", "F4": "9", "F5": "37", "F6": "37", "F7": "58", "F8": "58", "F9": "6", "B4": "345678", "B5": "23456789", "B6": "236789", "B7": "2345678", "B1": "2345689", "B2": "1234568", "B3": "1234569", "B8": "3456789", "B9": "124578", "I9": "9", "I8": "345678", "I1": "2345678", "I3": "23456", "I2": "2345678", "I5": "2345678", "I4": "345678", "I7": "1", "I6": "23678", "A1": "2345689", "A3": "7", "A2": "234568", "E9": "3", "A4": "34568", "A7": "234568", "A6": "23689", "A9": "2458", "A8": "345689", "E7": "9", "E6": "4", "E1": "567", "E3": "56", "E2": "567", "E8": "1", "A5": "1", "H8": "345678", "H9": "24578", "H2": "12345678", "H3": "1234569", "H1": "23456789", "H6": "1236789", "H7": "2345678", "H4": "345678", "H5": "23456789", "D8": "2", "D9": "47", "D6": "5", "D7": "47", "D4": "1", "D5": "36", "D2": "9", "D3": "8", "D1": "36"}
+    display(values)
+    values = naked_twins(values)
+    print('-------NAKED TWIN---------')
+    if (values):
+        display(values)
+    values = solve(values)
+    print('------SOLVE----------')
+    if (values):
+        display(values)
