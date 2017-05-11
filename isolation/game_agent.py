@@ -3,7 +3,7 @@ test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
 import random
-
+import math
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -213,9 +213,45 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
-
-
+        moves = game.get_legal_moves()
+        val = self.min_value(game,depth,0)
+        for move in moves:
+            new_game = game.forecast_move(move)
+            if self.score(new_game,new_game.active_player) == val:
+                return move
+        
+        return (-1,-1);
+    
+    def max_value(self, game, depth, curr_level):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        if curr_level == depth:
+            return self.score(game, game.active_player)
+        
+        val = - math.inf
+        for move in game.get_legal_moves():
+            game = game.forecast_move(move)
+            minimizer = self.min_value(game, depth, curr_level+1 )
+            val = max(val, minimizer)
+        
+        return val
+    
+    def min_value(self, game, depth, curr_level):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        if curr_level == depth:
+            return self.score(game, game.active_player)
+        
+        val =  math.inf
+        for move in game.get_legal_moves():
+            game = game.forecast_move(move)
+            maximizer = self.max_value(game, depth, curr_level+1 )
+            val = min(val, maximizer)
+        
+        return val    
+        
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
