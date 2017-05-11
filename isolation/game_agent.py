@@ -231,8 +231,7 @@ class MinimaxPlayer(IsolationPlayer):
         
         val = - math.inf
         for move in game.get_legal_moves():
-            game = game.forecast_move(move)
-            minimizer = self.min_value(game, depth, curr_level+1 )
+            minimizer = self.min_value(game.forecast_move(move), depth, curr_level+1 )
             val = max(val, minimizer)
         
         return val
@@ -246,8 +245,7 @@ class MinimaxPlayer(IsolationPlayer):
         
         val =  math.inf
         for move in game.get_legal_moves():
-            game = game.forecast_move(move)
-            maximizer = self.max_value(game, depth, curr_level+1 )
+            maximizer = self.max_value(game.forecast_move(move), depth, curr_level+1 )
             val = min(val, maximizer)
         
         return val    
