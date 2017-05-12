@@ -339,5 +339,47 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
+        moves = game.get_legal_moves()
+        val = self.alphabeta_min_value(game,depth,0, alpha, beta)
+        for move in moves:
+            new_game = game.forecast_move(move)
+            if self.score(new_game,new_game.active_player) == val:
+                return move
+        
+        return (-1,-1);
         # TODO: finish this function!
-        raise NotImplementedError
+        
+    def alphabeta_max_value(self, game, depth, curr_level, alpha, beta):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+            
+        if curr_level == depth:
+            return self.score(game, game.active_player)
+            
+        val = - math.inf
+        for move in game.get_legal_moves():
+            minimizer = self.alphabeta_min_value(game.forecast_move(move), depth, curr_level+1, alpha, beta )
+            val = max(val, minimizer)
+            alpha = max(minimizer, alpha)
+            if alpha >= beta:
+                break
+            
+        return val
+    
+    def alphabeta_min_value(self, game, depth, curr_level,alpha, beta):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        if curr_level == depth:
+            return self.score(game, game.active_player)
+        
+        val =  math.inf
+        for move in game.get_legal_moves():
+            maximizer = self.alphabeta_max_value(game.forecast_move(move), depth, curr_level+1, alpha, beta  )
+            val = min(val, maximizer)
+            beta = min(maximizer, beta)
+            if beta <= alpha:
+                break
+            
+        
+        return val
