@@ -230,8 +230,9 @@ class MinimaxPlayer(IsolationPlayer):
             return self.score(game, game.active_player)
         
         val = - math.inf
+        curr_level = curr_level + 1
         for move in game.get_legal_moves():
-            minimizer = self.min_value(game.forecast_move(move), depth, curr_level+1 )
+            minimizer = self.min_value(game.forecast_move(move), depth, curr_level )
             val = max(val, minimizer)
         
         return val
@@ -241,11 +242,12 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
         
         if curr_level == depth:
-            return self.score(game, game.active_player)
+            return self.score(game, game.inactive_player)
         
         val =  math.inf
+        curr_level = curr_level + 1
         for move in game.get_legal_moves():
-            maximizer = self.max_value(game.forecast_move(move), depth, curr_level+1 )
+            maximizer = self.max_value(game.forecast_move(move), depth, curr_level )
             val = min(val, maximizer)
         
         return val    
