@@ -247,7 +247,7 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
         
         if curr_level == depth:
-            return self.score(game, game.active_player)
+            return self.score(game, self)
         
         val = - math.inf
         curr_level = curr_level + 1
