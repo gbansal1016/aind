@@ -246,7 +246,8 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
-        if curr_level == depth:
+        legal_moves = game.get_legal_moves
+        if curr_level == depth or not legal_moves:
             return self.score(game, self)
         
         val = - math.inf
@@ -261,7 +262,8 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
-        if curr_level == depth:
+        legal_moves = game.get_legal_moves
+        if curr_level == depth or not legal_moves:
             return self.score(game, self)
         
         val =  math.inf
