@@ -233,14 +233,21 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
+        best_move = (-1,-1)
+        best_val = -math.inf
         moves = game.get_legal_moves()
-        val = self.min_value(game,depth,1)
+        
+        
         for move in moves:
             new_game = game.forecast_move(move)
-            if self.score(new_game,new_game.active_player) == val:
-                return move
+            val = self.min_value(new_game,depth,1)
+            if val > best_val:
+                best_val = val
+                best_move = move
+            #if self.score(new_game,new_game.active_player) == val:
+            #    return move
         
-        return (-1,-1);
+        return best_move;
     
     def max_value(self, game, depth, curr_level):
         if self.time_left() < self.TIMER_THRESHOLD:
@@ -385,26 +392,33 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
+        best_move = (-1,-1)
+        best_val = -math.inf
         moves = game.get_legal_moves()
-        val = self.alphabeta_min_value(game,depth,1, alpha, beta)
+        
         for move in moves:
             new_game = game.forecast_move(move)
-            if self.score(new_game,new_game.active_player) == val:
-                return move
+            val = self.alphabeta_min_value(new_game,depth,1,alpha, beta)
+            if val > best_val:
+                best_val = val
+                best_move = move
+
         
-        return (-1,-1);
-        # TODO: finish this function!
-        
+        return best_move;
+    
     def alphabeta_max_value(self, game, depth, curr_level, alpha, beta):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
             
-        if curr_level == depth:
-            return self.score(game, game.active_player)
-            
+        legal_moves = game.get_legal_moves()
+        if curr_level >= depth or not legal_moves:
+            return self.score(game, self)
+        
         val = - math.inf
+        curr_level = curr_level + 1
         for move in game.get_legal_moves():
-            minimizer = self.alphabeta_min_value(game.forecast_move(move), depth, curr_level+1, alpha, beta )
+            next_state = game.forecast_move(move)
+            minimizer = self.alphabeta_min_value(next_state, depth, curr_level, alpha, beta )
             val = max(val, minimizer)
             alpha = max(minimizer, alpha)
             if alpha >= beta:
@@ -416,15 +430,18 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
-        if curr_level == depth:
+        legal_moves = game.get_legal_moves()
+        if curr_level >= depth or not legal_moves:
             return self.score(game, self)
         
         val =  math.inf
+        curr_level = curr_level + 1
         for move in game.get_legal_moves():
-            maximizer = self.alphabeta_max_value(game.forecast_move(move), depth, curr_level+1, alpha, beta  )
+            next_state = game.forecast_move(move)
+            maximizer = self.alphabeta_max_value(next_state, depth, curr_level, alpha, beta  )
             val = min(val, maximizer)
             beta = min(maximizer, beta)
-            if beta <= alpha:
+            if alpha >= beta:
                 break
             
         
