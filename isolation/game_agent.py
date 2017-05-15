@@ -420,9 +420,11 @@ class AlphaBetaPlayer(IsolationPlayer):
             next_state = game.forecast_move(move)
             minimizer = self.alphabeta_min_value(next_state, depth, curr_level, alpha, beta )
             val = max(val, minimizer)
+            if val >= beta:
+                return val
             alpha = max(val, alpha)
-            if alpha >= beta:
-                break
+            #if alpha >= beta:
+            #    break
             
         return val
     
@@ -440,9 +442,11 @@ class AlphaBetaPlayer(IsolationPlayer):
             next_state = game.forecast_move(move)
             maximizer = self.alphabeta_max_value(next_state, depth, curr_level, alpha, beta  )
             val = min(val, maximizer)
+            if val <= alpha:
+                return val
             beta = min(val, beta)
-            if alpha >= beta:
-                break
+            #if alpha >= beta:
+            #    break
             
         
         return val
