@@ -416,11 +416,11 @@ class AlphaBetaPlayer(IsolationPlayer):
         
         val = - math.inf
         curr_level = curr_level + 1
-        for move in game.get_legal_moves():
+        for move in legal_moves:
             next_state = game.forecast_move(move)
             minimizer = self.alphabeta_min_value(next_state, depth, curr_level, alpha, beta )
             val = max(val, minimizer)
-            alpha = max(minimizer, alpha)
+            alpha = max(val, alpha)
             if alpha >= beta:
                 break
             
@@ -436,11 +436,11 @@ class AlphaBetaPlayer(IsolationPlayer):
         
         val =  math.inf
         curr_level = curr_level + 1
-        for move in game.get_legal_moves():
+        for move in legal_moves:
             next_state = game.forecast_move(move)
             maximizer = self.alphabeta_max_value(next_state, depth, curr_level, alpha, beta  )
             val = min(val, maximizer)
-            beta = min(maximizer, beta)
+            beta = min(val, beta)
             if alpha >= beta:
                 break
             
