@@ -399,6 +399,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         for move in moves:
             new_game = game.forecast_move(move)
             val = self.alphabeta_min_value(new_game,depth,1,alpha, beta)
+            alpha = max(alpha, val)
             if val > best_val:
                 best_val = val
                 best_move = move
