@@ -90,9 +90,9 @@ class SelectorCV(ModelSelector):
                     if self.verbose:
                         print("model created for {} states throws error".format(num_components))
                 
-                avg_score = np.mean(cv_model_scores) if len(score) > 0 else float('-inf')
-                if (avg_score > best_score):
-                        best_score, best_hmm_model = avg_score, hmm_model
+            avg_score = np.mean(cv_model_scores) if len(score) > 0 else float('-inf')
+            if (avg_score > best_score):
+                best_score, best_hmm_model = avg_score, hmm_model
             
         return best_hmm_model
 
