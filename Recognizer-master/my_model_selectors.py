@@ -64,8 +64,8 @@ class SelectorConstant(ModelSelector):
         return self.base_model(best_num_components)
 
 class SelectorCV(ModelSelector):
-    ''' select best model based on average log Likelihood of cross-validation folds
-    '''
+    #select best model based on average log Likelihood of cross-validation folds
+    
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
