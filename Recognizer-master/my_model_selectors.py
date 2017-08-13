@@ -17,7 +17,6 @@ class ModelSelector(object):
     '''
     base class for model selection (strategy design pattern)
     '''
-
     def __init__(self, all_word_sequences: dict, all_word_Xlengths: dict, this_word: str,
                  n_constant=3,
                  min_n_components=2, max_n_components=10,
@@ -76,21 +75,28 @@ class SelectorCV(ModelSelector):
         
         for num_components in range(self.min_n_components, self.max_n_components + 1):
             cv_model_scores = []
-            split_method = KFold()
-            for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
-                X_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
-                X_test, lengths_test = combine_sequences(cv_test_idx, self.sequences)
+            
+            try:
+                folds = 2
+                if (len(self.sequences) > 1):
+                    folds = min(len(self.sequences),3)
+
+                #print('number of folds', folds)
+                split_method = KFold(n_splits=folds)
+            
+                for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+                    X_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+                    X_test, lengths_test = combine_sequences(cv_test_idx, self.sequences)
                 
-                try:
                     hmm_model = GaussianHMM(n_components=num_components, covariance_type="diag", n_iter=1000,random_state=self.random_state, verbose=False).fit(X_train, lengths_train)
                     score = hmm_model.score(X_test, lengths_test)
                     
                     cv_model_scores.append(score) 
-                except ValueError:
-                    if self.verbose:
-                        print("model created for {} states throws error".format(num_components))
+            except:
+                if self.verbose:
+                    print("model created for {} states throws error".format(num_components))
                 
-            avg_score = np.mean(cv_model_scores) if len(score) > 0 else float('-inf')
+            avg_score = np.mean(cv_model_scores) if len(cv_model_scores) > 0 else float('-inf')
             if (avg_score > best_score):
                 best_score, best_hmm_model = avg_score, hmm_model
             
@@ -101,20 +107,43 @@ class SelectorBIC(ModelSelector):
 
     http://www2.imm.dtu.dk/courses/02433/doc/ch6_slides.pdf
     Bayesian information criteria: BIC = -2 * logL + p * logN
+    
+    p = number of parameters
+    N = number of data points
     """
 
     def select(self):
         """ select the best model for self.this_word based on
         BIC score for n between self.min_n_components and self.max_n_components
-
+        
         :return: GaussianHMM object
         """
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-        # TODO implement model selection based on BIC scores
-        raise NotImplementedError
-
-
+        best_model = None
+        #Lower the BIC value the better the mode
+        min_score = float('inf')
+        for num_components in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(num_components)
+                score = model.score(self.X, self.lengths)
+                
+                
+                num_data = self.X.shape[0]
+                num_features = self.X.shape[1]
+                #num_params = # of transition probabilities + # of means + # of variances + # of initial probabilities
+                #num_params = num_components * (num_components - 1) + num_features * 2 * num_components + num_components -1
+                num_params = num_components * num_components + num_features * 2 * num_components - 1
+                bic_score = -2 * score + np.log(num_data) * num_params
+                
+                if bic_score < min_score:
+                    min_score, best_model = bic_score, model
+            except:
+                    if self.verbose:
+                        print("model created for {} states throws error".format(num_components))
+        
+        return best_model
+            
 class SelectorDIC(ModelSelector):
     ''' select best model based on Discriminative Information Criterion
 
@@ -127,5 +156,31 @@ class SelectorDIC(ModelSelector):
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-        # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+        best_model = None
+        best_score = float('-inf')
+        
+        rest_words = list(self.words)
+        rest_words.remove(self.this_word)
+        for num_components in range(self.min_n_components, self.max_n_components + 1):
+            all_score = 0.0
+            try:
+                model = self.base_model(num_components)
+                score = model.score(self.X, self.lengths)
+                
+                for r_word in rest_words:
+                     r_X, r_lengths = self.hwords[r_word]
+                     r_score = model.score(r_X, r_lengths)
+                     all_score += r_score
+                
+                all_avg_score = all_score / len(rest_words)
+                
+                dic_score = score - all_avg_score
+                
+                if dic_score > best_score:
+                    best_score, best_model = dic_score, model
+                    
+            except:
+                    if self.verbose:
+                        print("model created for {} states throws error".format(num_components))
+        
+        return best_model
